@@ -162,7 +162,7 @@ int getHumanMove(int humanNum) {
     cin >> humanMove;
 
     while (humanMove < 0 || humanMove > 9) {
-        cout << "Invalid move! Choose square 1-9: ";
+        cout << "Invalid move! Choose a square 1-9: ";
         cin >> humanMove;
 
     }
@@ -224,6 +224,7 @@ int main() {
     }
 
     // step 3: determine winner, if any
+    printBoard();
     cout << "Game has ended in a draw" << endl;
 
     return 0;
