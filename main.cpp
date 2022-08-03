@@ -5,6 +5,17 @@
 using namespace std;
 
 int board[9];
+const int winCombinations[8][3] = {
+    {0,1,2},
+    {3,4,5},
+    {6,7,8},
+    {0,3,6},
+    {1,4,7},
+    {2,5,8},
+    {0,4,8},
+    {2,4,6}
+};
+
 
 //============================================================================
 // int score(int cell1,int cell2,int cell3)
@@ -39,17 +50,6 @@ int score(int cell1,int cell2,int cell3) {
 bool playerWins(int playerNum) {
     
     int winningScore = 3 * playerNum;
-    int winCombinations[8][3] = {
-        {0,1,2},
-        {3,4,5},
-        {6,7,8},
-        {0,3,6},
-        {1,4,7},
-        {2,5,8},
-        {0,4,8},
-        {2,4,6}
-    };
-    
     for (int i = 0; i < 8; i++) {
         if (score(winCombinations[i][0], winCombinations[i][1], winCombinations[i][2]) == winningScore) {
             return true;
@@ -75,6 +75,19 @@ bool playerWins(int playerNum) {
 
 bool canWin(int playerNum,int &cell) {
     
+    int canWinScore = 2 * playerNum;
+    
+    for (int i = 0; i < 8; i++) {
+        if (score(winCombinations[i][0], winCombinations[i][1], winCombinations[i][2]) == canWinScore) {
+            for (int j = 0; j < 3; j++) {
+                if (board[winCombinations[i][j]] == 0) {
+                    cell = winCombinations[i][j];
+                    return true; 
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -90,9 +103,9 @@ void printBoard() {
     
     // Create new X and O array given values in board array 
     for (int i = 0; i < 9; i++) {
-        if (board[i] == -1) {
+        if (board[i] == 1) {
             xoBoard[i] = 'X';
-        } else if (board[i] == 1) {
+        } else if (board[i] == -1) {
             xoBoard[i] = 'O';
         } else {
             xoBoard[i] = ' ';
@@ -125,11 +138,11 @@ void printBoard() {
 
 int getComputerMove(int computerNum) {
 
-    int computerMoves[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7}; // Spots 5, 1, 3, 7, 9, 2, 4, 6, 8 (Need to subract 1 since array starts at 0
+    int computerMoves[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7}; // Spots 5, 1, 3, 7, 9, 2, 4, 6, 8 (Need to subract 1 since array starts at 0)
     int computerMove;
 
     if (canWin(computerNum, computerMove)) {
-
+        
     } else {
 
         for (int i = 0; i < 9; i++) {
@@ -139,6 +152,7 @@ int getComputerMove(int computerNum) {
             }
         }
     }
+
     return computerMove;
 }
 
@@ -166,10 +180,6 @@ int getHumanMove(int humanNum) {
         cin >> humanMove;
 
     }
-    
-    // Allow user to quit the game 
-    if (humanMove == 0)
-        exit(1);
 
     while (board[humanMove - 1] != 0) {
         cout << "Square on board has already been choosen. Choose another square: ";
@@ -177,6 +187,12 @@ int getHumanMove(int humanNum) {
         if (humanMove == 0)
             exit(1);
     }
+    
+    // Allow user to quit the game 
+    if (humanMove == 0)
+        exit(1);
+
+    humanMove -= 1;                                         // adjust humanMove to be correct on Gameboard
 
     return humanMove;
 
@@ -190,30 +206,32 @@ int main() {
 
     // step 1: determine X and O
     srand(time(nullptr));
-    playerNum = (rand() % 2) * 2 - 1;                       // randomize if 'X' or 'O' goes first                      
     human = (rand() % 2) * 2 - 1;                           // randomize if human is 'X' or 'O'
     computer = human * -1;                                  // gives computer a value based of what the human is
 
+    playerNum = 1;                                          // Default value is 1 to make 'X' go first everytime 
+
+    printBoard();                                           // Initial printing of the gameboard
+    
     // step 2: loop 9 iterations (or until someone wins)
     for (int i = 0; i < 9; i++) {
-        printBoard();
 
         // step 2.1: if computer move, get computer move and update board
         if (playerNum == computer) {                    
             board[getComputerMove(playerNum)] = computer; 
+            printBoard();
 
         // step 2.2 : if human move, display board, get human move and update board
         } else if (playerNum == human) {
-            board[getHumanMove(playerNum) - 1] = human; 
+            board[getHumanMove(playerNum)] = human; 
+            printBoard();
         }
 
         // step 2.3: if not done in the loop check, check for winner, and if true print winner 
         if (playerWins(playerNum) && playerNum == human){
-            printBoard();                                   // print board to show final move
             cout << "You win!" << endl;
             return 1;
         } else if (playerWins(playerNum) && playerNum == computer) {
-            printBoard();                                   // print board to show final move
             cout << "Computer Wins!" << endl;
             return 1;
         }
