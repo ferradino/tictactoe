@@ -89,6 +89,27 @@ bool canWin(int playerNum,int &cell) {
     }
 
     return false;
+    
+}
+
+//============================================================================
+// void printStartingScreen()
+//   Displays Welcome Message and Rules
+//   Player must press enter to begin
+
+void printStartingScreen() {
+
+    cout << "\033[2J\033[H";
+    cout << "Welcome to Tic-Tac-Toe!" << endl; 
+    cout << "-----------------------" << endl << endl;
+    cout << "Rules:" << endl;
+    cout << "1) The game will randomly choose which player moves first, and alternate after each move." << endl;
+    cout << "2) Each spot on the board corresponds to a number. To make a move, choose the number for that spot:" << endl; 
+    cout << "\t 1 | 2 | 3 \n\t --------- \n\t 4 | 5 | 6 \n\t --------- \n\t 7 | 8 | 9" << endl;
+    cout << "3) First player to get 3 in a row wins. If all spots are filled before someone wins, the game ends in a draw." << endl << endl;
+    cout << "Press ENTER to begin: ";
+    cin.get();
+
 }
 
 
@@ -115,11 +136,11 @@ void printBoard() {
     // Draw Gameboard
     cout << "\033[2J\033[H";
     cout << endl, 
-    cout << xoBoard[0] << " | " << xoBoard[1] << " | " << xoBoard[2] << endl;
-    cout << "---------" << endl;
-    cout << xoBoard[3] << " | " << xoBoard[4] << " | " << xoBoard[5] << endl;
-    cout << "---------" << endl;
-    cout << xoBoard[6] << " | " << xoBoard[7] << " | " << xoBoard[8] << endl;
+    cout << ' ' << xoBoard[0] << " | " << xoBoard[1] << " | " << xoBoard[2] << endl;
+    cout << "-----------" << endl;
+    cout << ' ' << xoBoard[3] << " | " << xoBoard[4] << " | " << xoBoard[5] << endl;
+    cout << "-----------" << endl;
+    cout << ' ' << xoBoard[6] << " | " << xoBoard[7] << " | " << xoBoard[8] << endl;
     cout << endl;
  
 }
@@ -141,10 +162,14 @@ int getComputerMove(int computerNum) {
     int computerMoves[9] = {4, 0, 2, 6, 8, 1, 3, 5, 7}; // Spots 5, 1, 3, 7, 9, 2, 4, 6, 8 (Need to subract 1 since array starts at 0)
     int computerMove;
 
+    // if computer can win, have computer chose winning move 
     if (canWin(computerNum, computerMove)) {
-        
+        return computerMove;
+    // if player can win, have computer block the player's winning move    
+    } else if (canWin(-computerNum, computerMove)) {
+        return computerMove;
+    // if both conditions are false, have computer move through list of moves and select appropiate move    
     } else {
-
         for (int i = 0; i < 9; i++) {
             if (board[computerMoves[i]] == 0) {
                 computerMove = computerMoves[i]; 
@@ -154,6 +179,7 @@ int getComputerMove(int computerNum) {
     }
 
     return computerMove;
+
 }
 
 
@@ -171,28 +197,34 @@ int getComputerMove(int computerNum) {
 int getHumanMove(int humanNum) {
     
     int humanMove; 
+    bool validMove = false; 
 
-    cout << "Select a square on the board (0 to quit): ";
+    cout << "Select a spot on the board (0 to quit): ";
     cin >> humanMove;
 
-    while (humanMove < 0 || humanMove > 9) {
-        cout << "Invalid move! Choose a square 1-9: ";
-        cin >> humanMove;
+    while (!validMove) {
+        // Validate if user's move is in range of table
+        if (humanMove < 0 || humanMove > 9) {
+            printBoard();
+            cout << "Invalid move! Choose a spot 1-9 (0 to quit): ";
+            cin >> humanMove;
+        // Validate if user's move is not already taken
+        } else if (board[humanMove - 1] != 0) {
+            printBoard();
+            cout << "Spot has already been chosen! Choose another spot 1-9 (0 to quit): ";
+            cin >> humanMove;
+        // Returns true if conditition are met    
+        } else {
+            validMove = true;
+        }
 
     }
-
-    while (board[humanMove - 1] != 0) {
-        cout << "Square on board has already been choosen. Choose another square: ";
-        cin >> humanMove;
-        if (humanMove == 0)
-            exit(1);
-    }
-    
+     
     // Allow user to quit the game 
     if (humanMove == 0)
         exit(1);
 
-    humanMove -= 1;                                         // adjust humanMove to be correct on Gameboard
+    humanMove -= 1;                                         // adjust humanMove to match spots on board in board array 
 
     return humanMove;
 
@@ -211,8 +243,13 @@ int main() {
 
     playerNum = 1;                                          // Default value is 1 to make 'X' go first everytime 
 
-    printBoard();                                           // Initial printing of the gameboard
-    
+    // Display welcome message and provide rules to the game
+    printStartingScreen();
+
+    // Prints board if player is first to make move
+    if (human == playerNum)
+        printBoard();                                           
+
     // step 2: loop 9 iterations (or until someone wins)
     for (int i = 0; i < 9; i++) {
 
@@ -242,8 +279,7 @@ int main() {
     }
 
     // step 3: determine winner, if any
-    printBoard();
-    cout << "Game has ended in a draw" << endl;
+    cout << "Game has ended in a draw!" << endl;
 
     return 0;
 
